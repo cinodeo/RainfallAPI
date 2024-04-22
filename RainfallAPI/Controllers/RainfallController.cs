@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+﻿// Controller Layer
 using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RainfallAPI.Models;
 
 namespace RainfallAPI.Controllers
 {
@@ -17,12 +21,12 @@ namespace RainfallAPI.Controllers
         {
             _clientFactory = clientFactory;
         }
+
         [HttpGet("id/{stationId}/readings")]
-        [ProducesResponseType(typeof(string), 200)] // Document the response type for 200 status code
-        [ProducesResponseType(typeof(string), 400)] // Document the response type for 400 status code
-        [ProducesResponseType(typeof(string), 404)] // Document the response type for 404 status code
-        [ProducesResponseType(typeof(string), 500)] // Document the response type for 500 status code
-        public async Task<IActionResult> GetRainfallReadings(string stationId, [FromQuery] int count = 10)
+        [ProducesResponseType(typeof(RainfallReadingResponse), 200)]
+        [ProducesResponseType(typeof(ProblemDetails), 404)]
+        [ProducesResponseType(typeof(ProblemDetails), 500)]
+        public async Task<IActionResult> GetRainfallReadings(string stationId, [FromQuery] int count = 100)
         {
             var client = _clientFactory.CreateClient();
             var apiUrl = $"https://environment.data.gov.uk/flood-monitoring/id/stations/{stationId}/readings?_sorted&_limit={count}";
@@ -31,8 +35,13 @@ namespace RainfallAPI.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                var data = await response.Content.ReadAsStringAsync();
-                return Ok(data);
+                var responseData = await response.Content.ReadAsStringAsync();
+                var rainfallReadingResponse = JsonConvert.DeserializeObject<RainfallReadingResponse>(responseData);
+                return Ok(rainfallReadingResponse);
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return NotFound();
             }
             else
             {

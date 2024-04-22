@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     // Add comments directly within the responses section
-    c.OperationFilter<AddCommentsToResponses>();
+    //c.OperationFilter<AddCommentsToResponses>();
 });
 
 var app = builder.Build();
@@ -45,9 +45,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-  name: "default",
-  pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapControllerRoute(
   name: "rainfall",
   pattern: "rainfall/id/{stationId}/readings",
