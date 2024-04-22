@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,9 @@ builder.Services.AddSwaggerGen(c =>
         },
         Description = "An API which provides rainfall reading data"
     });
-
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
     // Add comments directly within the responses section
     //c.OperationFilter<AddCommentsToResponses>();
 });
@@ -51,89 +54,3 @@ app.MapControllerRoute(
   defaults: new { controller = "Rainfall", action = "GetRainfallReadings" });
 
 app.Run();
-
-public class AddCommentsToResponses : IOperationFilter
-{
-    public void Apply(OpenApiOperation operation, OperationFilterContext context)
-    {
-        operation.Responses.Clear(); // Clear existing responses
-
-        // Add responses
-        operation.Responses.Add("200", new OpenApiResponse
-        {
-            Description = "A list of rainfall readings successfully retrieved",
-            Content = new Dictionary<string, OpenApiMediaType>
-            {
-                ["application/json"] = new OpenApiMediaType
-                {
-                    Schema = new OpenApiSchema
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.Schema, // Indicate it's a schema reference
-                            Id = "#/components/schemas/rainfallReadingResponse" // Path to the schema definition
-                        }
-                    }
-                }
-            }
-        });
-
-        operation.Responses.Add("400", new OpenApiResponse
-        {
-            Description = "Invalid request",
-            Content = new Dictionary<string, OpenApiMediaType>
-            {
-                ["application/json"] = new OpenApiMediaType
-                {
-                    Schema = new OpenApiSchema
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.Schema, // Indicate it's a schema reference
-                            Id = "#/components/responses/errorResponse" // Path to the schema definition
-                        }
-                    }
-                }
-            }
-        });
-
-        operation.Responses.Add("404", new OpenApiResponse
-        {
-            Description = "No readings found for the specified stationId",
-            Content = new Dictionary<string, OpenApiMediaType>
-            {
-                ["application/json"] = new OpenApiMediaType
-                {
-                    Schema = new OpenApiSchema
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.Schema, // Indicate it's a schema reference
-                            Id = "#/components/responses/errorResponse" // Path to the schema definition
-                        }
-                    }
-                }
-            }
-        });
-
-        operation.Responses.Add("500", new OpenApiResponse
-        {
-            Description = "Internal server error",
-            Content = new Dictionary<string, OpenApiMediaType>
-            {
-                ["application/json"] = new OpenApiMediaType
-                {
-                    Schema = new OpenApiSchema
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.Schema, // Indicate it's a schema reference
-                            Id = "#/components/responses/errorResponse" // Path to the schema definition
-                        }
-                    }
-                }
-            }
-        });
-    }
-}
-
