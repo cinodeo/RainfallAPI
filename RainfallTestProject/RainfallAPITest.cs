@@ -69,5 +69,7 @@ namespace RainfallAPI.Tests
 
             // You can add more specific assertions on the IActionResult properties (e.g., status code)
         }
+        //Add another test to  check if items is empty
+        //Add another test to check if items are not empty
     }
 }

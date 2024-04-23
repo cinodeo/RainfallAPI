@@ -52,5 +52,12 @@ app.MapControllerRoute(
   name: "rainfall",
   pattern: "rainfall/id/{stationId}/readings",
   defaults: new { controller = "Rainfall", action = "GetRainfallReadings" });
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapGet("/", context =>
+    {
+        context.Response.Redirect("/swagger/index.html");
+        return Task.CompletedTask;
+    });
+});
 app.Run();
