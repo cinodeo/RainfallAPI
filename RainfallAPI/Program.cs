@@ -3,7 +3,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+var apiUrl = builder.Configuration.GetValue<string>("ApiSettings:ApiUrl");
 
+builder.Services.AddSingleton(apiUrl);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
@@ -22,11 +24,11 @@ builder.Services.AddSwaggerGen(c =>
         },
         Description = "An API which provides rainfall reading data"
     });
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
-    // Add comments directly within the responses section
-    //c.OperationFilter<AddCommentsToResponses>();
+    c.MapType<int>(() => new OpenApiSchema { Type = "number", Minimum = 1, Maximum = 100 }); //count min and max
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"; //get xml file path
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile); //get error responses from xml file from path
+    c.IncludeXmlComments(xmlPath); 
 });
 
 var app = builder.Build();
